@@ -170,14 +170,15 @@ npm run dev
 
 ---
 
+
+
 ## 📸 Screenshots
 
+A glimpse into the FlowPass experience, showcasing the intuitive interface, live navigation system, and smart ticket-based routing.
+
 | Dashboard | Live Navigation | Digital Ticket |
-| :---: | :---: | :---: |
-| *(placeholder: <img width="1366" height="768" alt="Screenshot (822)" src="https://github.com/user-attachments/assets/acb50d3f-dd94-497a-ab67-140440d79a83" />)
-* | *(Placeholder:<img width="1366" height="768" alt="Screenshot (823)" src="https://github.com/user-attachments/assets/0ec157e1-ac12-4da3-8e76-38c9d235755f" />
-)* | *(Placeholder:<img width="1366" height="768" alt="Screenshot (824)" src="https://github.com/user-attachments/assets/f166f874-8a12-477d-b722-f268a6628f98" />
-)* |
+|----------|----------------|----------------|
+| <img src="https://github.com/user-attachments/assets/acb50d3f-dd94-497a-ab67-140440d79a83" width="300"/> | <img src="https://github.com/user-attachments/assets/0ec157e1-ac12-4da3-8e76-38c9d235755f" width="300"/> | <img src="https://github.com/user-attachments/assets/f166f874-8a12-477d-b722-f268a6628f98" width="300"/> |
 
 ---
 
