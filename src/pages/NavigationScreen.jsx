@@ -34,7 +34,24 @@ const customStyles = `
   @keyframes pulse-indigo { 0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); } }
   @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } }
   @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); } }
-  .route-glow { filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6)); }
+  .route-glow { 
+    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6));
+    animation: dash-slide 20s linear infinite;
+  }
+  @keyframes dash-slide {
+    from { stroke-dashoffset: 200; }
+    to { stroke-dashoffset: 0; }
+  }
+  .pulse-marker.user {
+    background: #3b82f6; 
+    outline: 2px solid white; 
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+    animation: pulse-blue 2s infinite;
+  }
+  .google-maps-badge {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    pointer-events: auto;
+  }
 `;
 
 export const NavigationScreen = () => {
@@ -153,11 +170,15 @@ export const NavigationScreen = () => {
         <StadiumMap status={status} isNavigating={isNavigating} seatCode={seatCode} />
         <NotificationOverlay alerts={alerts} />
 
-        <div className="absolute top-4 left-4 z-[1000] pointer-events-none">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-[9px] font-black uppercase text-white shadow-xl italic">
-            <Sparkles size={10} className="text-indigo-400" /> AI Guided Routing Active
+          <div className="absolute top-4 left-4 z-[1000] pointer-events-none flex flex-col gap-2">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-[9px] font-black uppercase text-white shadow-xl italic">
+              <Sparkles size={10} className="text-indigo-400" /> AI Guided Routing Active
+            </div>
+            <div className="google-maps-badge flex items-center gap-1.5 px-3 py-1 bg-white/90 backdrop-blur-md border border-slate-200 rounded-full text-[8px] font-black text-slate-600 uppercase tracking-tighter self-start">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+              Powered by Google Maps-like Navigation
+            </div>
           </div>
-        </div>
 
         <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute bottom-6 left-6 right-6 z-[1000] glass-card p-4 bg-slate-900/80 backdrop-blur-xl border-white/10 flex justify-between items-center shadow-2xl">
           <div className="flex items-center gap-4">
