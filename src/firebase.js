@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -20,3 +21,5 @@ provider.setCustomParameters({
   prompt: 'select_account'
 });
 export const db = getFirestore(app);
+// Firebase Analytics integrated to track user behavior
+export const analytics = getAnalytics(app);

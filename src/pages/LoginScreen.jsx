@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { LogIn, Mail, Lock, Globe, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthLayout } from '../components/Auth/AuthLayout';
+import { analytics } from '../firebase';
+import { logEvent } from "firebase/analytics";
 
 export const LoginScreen = ({ onSwitch, onRecover }) => {
   const [email, setEmail] = useState('');
@@ -17,6 +19,7 @@ export const LoginScreen = ({ onSwitch, onRecover }) => {
       setError('');
       setLoading(true);
       await loginAsGuest();
+      logEvent(analytics, "login", { method: "guest" });
     } catch (err) {
       setError('Guest login failed. Please try again.');
     } finally {
@@ -34,6 +37,7 @@ export const LoginScreen = ({ onSwitch, onRecover }) => {
       setError('');
       setLoading(true);
       await login(email, password);
+      logEvent(analytics, "login", { method: "email" });
     } catch (err) {
       setError('Invalid email or password');
     } finally {
@@ -46,6 +50,7 @@ export const LoginScreen = ({ onSwitch, onRecover }) => {
       setError('');
       setLoading(true);
       await loginWithGoogle();
+      logEvent(analytics, "login", { method: "google" });
     } catch (err) {
       setError('Google login failed. Please try again.');
     } finally {

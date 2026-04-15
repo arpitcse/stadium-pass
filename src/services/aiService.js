@@ -3,6 +3,8 @@
  * Handles interactions with Google Gemini API for crowd analysis.
  * Refactored for maintainability and scalability.
  */
+import { analytics } from '../firebase';
+import { logEvent } from "firebase/analytics";
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const MODEL_NAME = "gemini-1.5-flash";
@@ -51,6 +53,7 @@ Focus on speed and efficiency.`;
       throw new Error("Invalid or empty response structure from Gemini API");
     }
 
+    logEvent(analytics, "ai_used");
     return insight.trim();
   } catch (error) {
     console.error("AI Insight fetch failed:", error.message);

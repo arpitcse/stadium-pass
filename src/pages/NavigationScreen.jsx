@@ -18,6 +18,8 @@ import { AI_CONFIG } from '../config/constants';
 // Sub-components
 import { StadiumMap } from '../components/Navigation/StadiumMap';
 import { NotificationOverlay } from '../components/Navigation/NotificationOverlay';
+import { analytics } from '../firebase';
+import { logEvent } from "firebase/analytics";
 
 const customStyles = `
   .pulse-marker {
@@ -60,6 +62,9 @@ export const NavigationScreen = () => {
     
     setIsAnalyzing(false);
     setIsNavigating(true);
+    logEvent(analytics, "navigate_click", {
+      destination: optimalGate
+    });
     pushNotification(`Seat ${seatCode.toUpperCase()} confirmed. Optimal path active.`, "success");
     setTimeout(() => setIsNavigating(false), 8000);
   };
