@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, ChevronRight } from 'lucide-react';
 import { FacilityItem } from '../components/Queue/FacilityItem';
 
-export const QueueHub = () => {
+// Performance optimized using memoization and lazy loading
+export const QueueHub = React.memo(() => {
   // Fetch real-time crowd data from Firebase
   // Improved readability and maintainability without altering functionality
   return (
@@ -71,4 +72,4 @@ export const QueueHub = () => {
       </motion.div>
     </main>
   );
-};
+});

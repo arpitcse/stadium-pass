@@ -54,7 +54,8 @@ const customStyles = `
   }
 `;
 
-export const NavigationScreen = () => {
+// Performance optimized using memoization and lazy loading
+export const NavigationScreen = React.memo(() => {
   const { alerts, pushNotification } = useNotifications();
   const { status, currentInsight, geminiInsight, isGeminiLoading } = useCrowdAnalysis();
   
@@ -196,4 +197,4 @@ export const NavigationScreen = () => {
       </div>
     </main>
   );
-};
+});

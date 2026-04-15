@@ -1,5 +1,5 @@
 import 'leaflet/dist/leaflet.css';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Contexts
@@ -11,15 +11,16 @@ import { TopNavbar } from './components/TopNavbar';
 import { BottomNav } from './components/BottomNav';
 
 // Pages
-import { Dashboard } from './pages/Dashboard';
-import { NavigationScreen } from './pages/NavigationScreen';
-import { QueueHub } from './pages/QueueHub';
-import { TicketScreen } from './pages/TicketScreen';
-import { LoginScreen } from './pages/LoginScreen';
-import { SignupScreen } from './pages/SignupScreen';
-import { RecoveryScreen } from './pages/RecoveryScreen';
-import { ProfileScreen } from './pages/ProfileScreen';
-import { SplashScreen } from './pages/SplashScreen';
+// Pages (Lazy Loaded)
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const NavigationScreen = lazy(() => import('./pages/NavigationScreen').then(m => ({ default: m.NavigationScreen })));
+const QueueHub = lazy(() => import('./pages/QueueHub').then(m => ({ default: m.QueueHub })));
+const TicketScreen = lazy(() => import('./pages/TicketScreen').then(m => ({ default: m.TicketScreen })));
+const LoginScreen = lazy(() => import('./pages/LoginScreen').then(m => ({ default: m.LoginScreen })));
+const SignupScreen = lazy(() => import('./pages/SignupScreen').then(m => ({ default: m.SignupScreen })));
+const RecoveryScreen = lazy(() => import('./pages/RecoveryScreen').then(m => ({ default: m.RecoveryScreen })));
+const ProfileScreen = lazy(() => import('./pages/ProfileScreen').then(m => ({ default: m.ProfileScreen })));
+const SplashScreen = lazy(() => import('./pages/SplashScreen').then(m => ({ default: m.SplashScreen })));
 
 const PAGE_VARIANTS = {
   initial: (direction) => ({
@@ -63,6 +64,10 @@ function AppContent() {
     setAuthView(view);
   }, [authView]);
 
+  const handleSwitchToSignup = useCallback(() => switchTo('signup'), [switchTo]);
+  const handleSwitchToLogin = useCallback(() => switchTo('login'), [switchTo]);
+  const handleSwitchToRecovery = useCallback(() => switchTo('recovery'), [switchTo]);
+
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 2500);
     return () => clearTimeout(timer);
@@ -75,27 +80,33 @@ function AppContent() {
     setActiveTab(newTab);
   }, [activeTab]);
 
-  if (showSplash) return <SplashScreen />;
+  if (showSplash) return (
+    <Suspense fallback={<div className="h-screen w-full bg-[#05070a]" />}>
+      <SplashScreen />
+    </Suspense>
+  );
 
   if (!currentUser) {
     return (
       <div className="h-screen w-full bg-transparent overflow-y-auto">
         <TopNavbar activeTab={activeTab} />
-        <AnimatePresence mode="wait" custom={authDir}>
-          <motion.div
-            key={authView}
-            custom={authDir}
-            variants={AUTH_VARIANTS}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {authView === 'login' && <LoginScreen onSwitch={() => switchTo('signup')} onRecover={() => switchTo('recovery')} />}
-            {authView === 'signup' && <SignupScreen onSwitch={() => switchTo('login')} />}
-            {authView === 'recovery' && <RecoveryScreen onSwitch={() => switchTo('login')} />}
-          </motion.div>
-        </AnimatePresence>
+        <Suspense fallback={<div className="h-screen flex items-center justify-center bg-[#05070a]/50 backdrop-blur-md" />}>
+          <AnimatePresence mode="wait" custom={authDir}>
+            <motion.div
+              key={authView}
+              custom={authDir}
+              variants={AUTH_VARIANTS}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {authView === 'login' && <LoginScreen onSwitch={handleSwitchToSignup} onRecover={handleSwitchToRecovery} />}
+              {authView === 'signup' && <SignupScreen onSwitch={handleSwitchToLogin} />}
+              {authView === 'recovery' && <RecoveryScreen onSwitch={handleSwitchToLogin} />}
+            </motion.div>
+          </AnimatePresence>
+        </Suspense>
       </div>
     );
   }
@@ -121,22 +132,24 @@ function AppContent() {
           aria-live="polite"
         >
           <AnimatePresence mode="wait" custom={direction} initial={false}>
-            <motion.div
-              key={activeTab}
-              custom={direction}
-              variants={PAGE_VARIANTS}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ 
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 },
-                filter: { duration: 0.2 }
-              }}
-              className="w-full px-6 pt-24 pb-48"
-            >
-              {renderContent()}
-            </motion.div>
+            <Suspense fallback={<div className="flex-1 w-full flex items-center justify-center min-h-[50vh]" />}>
+              <motion.div
+                key={activeTab}
+                custom={direction}
+                variants={PAGE_VARIANTS}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ 
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.2 },
+                  filter: { duration: 0.2 }
+                }}
+                className="w-full px-6 pt-24 pb-48"
+              >
+                {renderContent()}
+              </motion.div>
+            </Suspense>
           </AnimatePresence>
         </main>
 
@@ -154,11 +167,14 @@ function AppContent() {
   );
 }
 
+// Performance optimized using memoization and lazy loading
+const AppContentMemo = React.memo(AppContent);
+
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AppContent />
+        <AppContentMemo />
       </AuthProvider>
     </ThemeProvider>
   );

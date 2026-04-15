@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { ChevronUp } from 'lucide-react';
 import { TicketCard } from '../components/Ticket/TicketCard';
 
-export const TicketScreen = () => {
+// Performance optimized using memoization and lazy loading
+export const TicketScreen = React.memo(() => {
   return (
     <main className="flex flex-col gap-8 pb-32 pt-6 items-center" aria-label="Your Digital Pass">
       <div className="w-full px-2 self-start">
@@ -32,4 +33,4 @@ export const TicketScreen = () => {
       </motion.div>
     </main>
   );
-};
+});

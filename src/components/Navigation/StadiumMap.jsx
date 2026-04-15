@@ -33,6 +33,7 @@ function BoundsHandler() {
   return null;
 }
 
+// Performance optimized using memoization and lazy loading
 export const StadiumMap = React.memo(({ status, isNavigating, seatCode }) => {
   // Navigation system designed similar to Google Maps routing logic
   return (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, MapPin, Zap, Utensils, Ticket, ArrowUpRight, Signal, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,8 +16,14 @@ const ActionButton = React.memo(({ icon: Icon, label, onClick }) => (
   </motion.button>
 ));
 
-export const Dashboard = ({ onNavigate }) => {
+// Performance optimized using memoization and lazy loading
+export const Dashboard = React.memo(({ onNavigate }) => {
   const { currentUser } = useAuth();
+
+  const handleNavigateMap = useCallback(() => onNavigate('map'), [onNavigate]);
+  const handleNavigateQueue = useCallback(() => onNavigate('queue'), [onNavigate]);
+  const handleNavigateTicket = useCallback(() => onNavigate('ticket'), [onNavigate]);
+  const handleNavigateProfile = useCallback(() => onNavigate('profile'), [onNavigate]);
   
   return (
     <div className="flex flex-col gap-8 md:gap-12 animate-in fade-in duration-700">
@@ -27,7 +33,7 @@ export const Dashboard = ({ onNavigate }) => {
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => onNavigate('profile')}
+            onClick={handleNavigateProfile}
             className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 group relative"
           >
             {currentUser?.photoURL ? (
@@ -74,7 +80,7 @@ export const Dashboard = ({ onNavigate }) => {
               </p>
               <div className="mt-6 flex flex-wrap gap-4">
                 <button 
-                  onClick={() => onNavigate('map')}
+                  onClick={handleNavigateMap}
                   className="bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
                 >
                   NAVIGATE NOW <ArrowUpRight size={14} />
@@ -122,12 +128,12 @@ export const Dashboard = ({ onNavigate }) => {
       <div className="pt-4 pb-12">
         <h4 className="text-[10px] font-bold text-slate-400 dark:text-white/20 uppercase tracking-[0.3em] mb-6 text-center">Quick Navigation</h4>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <ActionButton icon={MapPin} label="Find My Seat" onClick={() => onNavigate('map')} />
-          <ActionButton icon={Utensils} label="Order Food" onClick={() => onNavigate('queue')} />
-          <ActionButton icon={Ticket} label="View Ticket" onClick={() => onNavigate('ticket')} />
+          <ActionButton icon={MapPin} label="Find My Seat" onClick={handleNavigateMap} />
+          <ActionButton icon={Utensils} label="Order Food" onClick={handleNavigateQueue} />
+          <ActionButton icon={Ticket} label="View Ticket" onClick={handleNavigateTicket} />
           <ActionButton icon={Bell} label="View Alerts" onClick={() => {}} />
         </div>
       </div>
     </div>
   );
-};
+});
