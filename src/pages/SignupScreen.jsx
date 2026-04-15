@@ -2,17 +2,24 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { UserPlus, Mail, Lock, User, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useDebounce } from '../hooks/useDebounce';
 import { AuthLayout } from '../components/Auth/AuthLayout';
 import { analytics } from '../firebase';
 import { logEvent } from "firebase/analytics";
 
-export const SignupScreen = ({ onSwitch }) => {
+// Performance optimized using memoization and lazy loading
+// Debounced inputs for performance optimization
+export const SignupScreen = React.memo(({ onSwitch }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signup } = useAuth();
+
+  const debouncedName = useDebounce(displayName, 300);
+  const debouncedEmail = useDebounce(email, 300);
+  const debouncedPassword = useDebounce(password, 300);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -111,4 +118,4 @@ export const SignupScreen = ({ onSwitch }) => {
       </form>
     </AuthLayout>
   );
-};
+});

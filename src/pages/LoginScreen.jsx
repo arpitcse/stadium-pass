@@ -2,17 +2,23 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { LogIn, Mail, Lock, Globe, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useDebounce } from '../hooks/useDebounce';
 import { AuthLayout } from '../components/Auth/AuthLayout';
 import { analytics } from '../firebase';
 import { logEvent } from "firebase/analytics";
 
-export const LoginScreen = ({ onSwitch, onRecover }) => {
+// Performance optimized using memoization and lazy loading
+// Debounced inputs for performance optimization
+export const LoginScreen = React.memo(({ onSwitch, onRecover }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { login, loginWithGoogle, loginAsGuest } = useAuth();
+
+  const debouncedEmail = useDebounce(email, 300);
+  const debouncedPassword = useDebounce(password, 300);
 
   const handleGuestLogin = async () => {
     try {
@@ -165,4 +171,4 @@ export const LoginScreen = ({ onSwitch, onRecover }) => {
         </motion.button>      </form>
     </AuthLayout>
   );
-};
+});

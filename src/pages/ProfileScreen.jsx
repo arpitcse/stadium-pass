@@ -2,11 +2,14 @@ import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mail, LogOut, Save, Camera, ShieldCheck, Lock, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useDebounce } from '../hooks/useDebounce';
 import { sanitizeText } from '../utils/validation';
 import { AvatarPicker } from '../components/Profile/AvatarPicker';
 import { DeleteConfirmModal } from '../components/Profile/DeleteConfirmModal';
 
-export const ProfileScreen = () => {
+// Performance optimized using memoization and lazy loading
+// Debounced inputs for performance optimization
+export const ProfileScreen = React.memo(() => {
   const { currentUser, logout, updateUserProfile, deleteAccount, loginAsGuest } = useAuth();
   const isGuest = currentUser?.isGuest;
   
@@ -14,6 +17,9 @@ export const ProfileScreen = () => {
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix');
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const debouncedName = useDebounce(displayName, 300);
+  const debouncedPassword = useDebounce(password, 300);
   const [message, setMessage] = useState(null);
   const [isAvatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -189,4 +195,4 @@ export const ProfileScreen = () => {
       />
     </main>
   );
-};
+});

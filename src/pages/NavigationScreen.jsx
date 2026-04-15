@@ -13,6 +13,7 @@ import {
 // Modules & Services
 import { useNotifications } from '../hooks/useNotifications';
 import { useCrowdAnalysis } from '../hooks/useCrowdAnalysis';
+import { useDebounce } from '../hooks/useDebounce';
 import { AI_CONFIG } from '../config/constants';
 
 // Sub-components
@@ -63,6 +64,8 @@ export const NavigationScreen = React.memo(() => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [seatCode, setSeatCode] = useState('');
   const [inputError, setInputError] = useState('');
+  // Debounced inputs for performance optimization
+  const debouncedSeatCode = useDebounce(seatCode, 300);
 
   const handleNavigate = async () => {
     if (!seatCode.trim()) {
@@ -88,9 +91,9 @@ export const NavigationScreen = React.memo(() => {
   };
 
   const optimalGate = useMemo(() => {
-    if (!seatCode) return 'Gate 4 North';
-    return seatCode.toUpperCase().startsWith('B') ? 'Gate 4 South' : 'Gate 1 North';
-  }, [seatCode]);
+    if (!debouncedSeatCode) return 'Gate 4 North';
+    return debouncedSeatCode.toUpperCase().startsWith('B') ? 'Gate 4 South' : 'Gate 1 North';
+  }, [debouncedSeatCode]);
 
   return (
     <main className="flex flex-col lg:flex-row h-full min-h-[80vh] lg:h-[calc(100vh-160px)] gap-6 pb-24 lg:pb-6 pt-6 overflow-hidden">
