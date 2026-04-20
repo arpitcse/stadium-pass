@@ -9,9 +9,10 @@ const ActionButton = React.memo(({ icon: Icon, label, onClick }) => (
     whileHover={{ scale: 1.05, backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
     whileTap={{ scale: 0.95 }}
     onClick={onClick}
+    aria-label={`Open ${label} screen`}
     className="glass-card p-4 md:p-6 flex flex-col items-center justify-center gap-2 w-full border border-slate-200 dark:border-none shadow-sm dark:shadow-none bg-white dark:bg-white/[0.04] transition-all"
   >
-    <Icon className="text-indigo-500 dark:text-indigo-400" size={24} />
+    <Icon className="text-indigo-500 dark:text-indigo-400" size={24} aria-hidden="true" />
     <span className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-white/60 uppercase tracking-widest">{label}</span>
   </motion.button>
 ));
@@ -34,13 +35,14 @@ export const Dashboard = React.memo(({ onNavigate }) => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleNavigateProfile}
+            aria-label="View profile and settings"
             className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 group relative"
           >
             {currentUser?.photoURL ? (
-              <img src={currentUser.photoURL} alt="User" className="w-full h-full object-cover" />
+              <img src={currentUser.photoURL} alt="User avatar" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-indigo-500/20 flex items-center justify-center">
-                <User size={20} className="text-indigo-400" />
+                <User size={20} className="text-indigo-400" aria-hidden="true" />
               </div>
             )}
           </motion.button>
@@ -53,9 +55,10 @@ export const Dashboard = React.memo(({ onNavigate }) => {
         </div>
         <motion.button 
           whileHover={{ scale: 1.1, rotate: 5 }}
+          aria-label="View recent alerts and notifications"
           className="p-3.5 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none relative"
         >
-          <Bell size={20} className="text-slate-600 dark:text-white/60" />
+          <Bell size={20} className="text-slate-600 dark:text-white/60" aria-hidden="true" />
           <div className="absolute top-3.5 right-3.5 w-2 h-2 bg-indigo-500 rounded-full border-2 border-white dark:border-[#05070a]" />
         </motion.button>
       </div>

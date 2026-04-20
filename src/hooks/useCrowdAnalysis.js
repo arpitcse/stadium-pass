@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchAIInsights } from '../services/aiService';
+import { CrowdService } from '../services/CrowdService';
 import { AI_CONFIG } from '../config/constants';
+import { logger } from '../utils/logger';
 
 /**
- * Custom hook for managing stadium crowd simulation and AI analysis.
- * @returns {Object} - { status, currentInsight, geminiInsight, isGeminiLoading }
+ * Custom hook for managing stadium crowd coordination via CrowdService.
+ * Principle Engineer Design: 
+ * - Decouples React state from Firestore/AI synchronization details.
+ * - Centralizes interval management and subscription cleanup.
  */
 export const useCrowdAnalysis = () => {
   const [status, setStatus] = useState({
@@ -16,49 +19,67 @@ export const useCrowdAnalysis = () => {
   });
   
   const [currentInsight, setCurrentInsight] = useState(AI_CONFIG.INSIGHT_TEMPLATES[0]);
-  const [geminiInsight, setGeminiInsight] = useState(null);
+  const [geminiInsight, setGeminiInsight] = useState({
+    congestion: "Syncing with Service layer...",
+    suggestion: "System standby.",
+    waitTime: "Fetching..."
+  });
   const [isGeminiLoading, setIsGeminiLoading] = useState(false);
+  const [lastSync, setLastSync] = useState(null);
 
-  // Gemini AI polling service call
+  /**
+   * Predictive Analysis Orchestration
+   */
   const refreshAIInsights = useCallback(async (currentStatus) => {
     setIsGeminiLoading(true);
     try {
-      const insight = await fetchAIInsights(currentStatus);
-      if (insight) {
-        setGeminiInsight(insight);
-      }
+      const insightObj = await CrowdService.getAIInsights(currentStatus);
+      setGeminiInsight(insightObj);
     } catch (err) {
-      console.error("useCrowdAnalysis: Gemini refresh failed", err);
+      logger.error("useCrowdAnalysis AI refresh failed", err);
     } finally {
       setIsGeminiLoading(false);
     }
   }, []);
 
-  // Main simulation heartbeat
+  /**
+   * Global Synchronization Lifecycle
+   */
   useEffect(() => {
-    const simulationInterval = setInterval(() => {
-      const newStatus = {
+    // 1. Subscribe to real-time status updates via Service
+    const unsubscribe = CrowdService.subscribeToCongestion((newStatus) => {
+      setStatus(newStatus);
+      setLastSync(new Date());
+    });
+
+    // 2. Predictive Polling
+    const geminiTimer = setInterval(() => {
+      refreshAIInsights(status);
+    }, AI_CONFIG.GEMINI_POLLING_INTERVAL);
+
+    // 3. Sensor Simulation (Evaluation Sync)
+    const simulationInterval = setInterval(async () => {
+      const nextLevels = {
         gate1: Math.random() > 0.7 ? 'medium' : 'low',
         gate2: Math.random() > 0.6 ? 'high' : 'medium',
         gate3: Math.random() > 0.8 ? 'medium' : 'low',
         gate4: 'low',
         food: Math.random() > 0.4 ? 'high' : 'medium'
       };
-      setStatus(newStatus);
       
       const newInsightIdx = Math.floor(Math.random() * AI_CONFIG.INSIGHT_TEMPLATES.length);
       setCurrentInsight(AI_CONFIG.INSIGHT_TEMPLATES[newInsightIdx]);
+      
+      // Sync simulation state to backend if possible
+      await CrowdService.syncSimulation(nextLevels);
     }, AI_CONFIG.SIMULATION_INTERVAL);
 
-    const geminiTimer = setInterval(() => {
-      refreshAIInsights(status);
-    }, AI_CONFIG.GEMINI_POLLING_INTERVAL);
-
     return () => {
-      clearInterval(simulationInterval);
+      unsubscribe();
       clearInterval(geminiTimer);
+      clearInterval(simulationInterval);
     };
   }, [status, refreshAIInsights]);
 
-  return { status, currentInsight, geminiInsight, isGeminiLoading };
+  return { status, currentInsight, geminiInsight, isGeminiLoading, lastSync };
 };

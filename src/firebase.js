@@ -22,4 +22,5 @@ provider.setCustomParameters({
 });
 export const db = getFirestore(app);
 // Firebase Analytics integrated to track user behavior
-export const analytics = getAnalytics(app);
+const analytics = getAnalytics(app);
+export { analytics };

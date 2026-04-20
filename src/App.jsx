@@ -9,6 +9,11 @@ import { ThemeProvider } from './contexts/ThemeContext';
 // Layout & Components
 import { TopNavbar } from './components/TopNavbar';
 import { BottomNav } from './components/BottomNav';
+import { trackPageView } from './services/analytics';
+import { AppTabRenderer } from './components/AppTabRenderer';
+import ErrorBoundary from './components/Common/ErrorBoundary';
+import { ChatbotBubble } from './components/Chatbot/ChatbotBubble';
+import { MetadataManager } from './utils/MetadataManager';
 
 // Pages
 // Pages (Lazy Loaded)
@@ -73,6 +78,25 @@ function AppContent() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Universal Page/Tab Tracking & Metadata Management
+  useEffect(() => {
+    if (showSplash) return;
+    
+    if (!currentUser) {
+      trackPageView(`Auth - ${authView}`, `/auth/${authView}`);
+      MetadataManager.update({
+        title: `Login - ${authView.charAt(0).toUpperCase() + authView.slice(1)}`,
+        description: "Join FlowPass for the best stadium experience."
+      });
+    } else {
+      trackPageView(`App - ${activeTab}`, `/${activeTab}`);
+      MetadataManager.update({
+        title: activeTab.charAt(0).toUpperCase() + activeTab.slice(1),
+        description: `Manage your stadium experience: ${activeTab}.`
+      });
+    }
+  }, [activeTab, authView, currentUser, showSplash]);
+
   const handleTabChange = useCallback((newTab) => {
     const prevIndex = TAB_ORDER.indexOf(activeTab);
     const nextIndex = TAB_ORDER.indexOf(newTab);
@@ -111,17 +135,6 @@ function AppContent() {
     );
   }
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'home': return <Dashboard key="home" onNavigate={handleTabChange} />;
-      case 'map': return <NavigationScreen key="map" />;
-      case 'queue': return <QueueHub key="queue" />;
-      case 'ticket': return <TicketScreen key="ticket" />;
-      case 'profile': return <ProfileScreen key="profile" />;
-      default: return <Dashboard key="home" onNavigate={handleTabChange} />;
-    }
-  };
-
   return (
     <div className="h-[100dvh] w-full bg-transparent overflow-hidden flex flex-col items-center relative">
       <TopNavbar activeTab={activeTab} onTabChange={handleTabChange} />
@@ -147,7 +160,7 @@ function AppContent() {
                 }}
                 className="w-full px-6 pt-24 pb-48"
               >
-                {renderContent()}
+                <AppTabRenderer activeTab={activeTab} handleTabChange={handleTabChange} />
               </motion.div>
             </Suspense>
           </AnimatePresence>
@@ -159,6 +172,9 @@ function AppContent() {
           </div>
         </div>
       </div>
+
+      {/* Smart Buddy AI Assistant */}
+      <ChatbotBubble />
 
       {/* Atmospheric Decorations */}
       <div className="fixed top-[-10%] left-[-5%] w-[60%] h-[60%] bg-indigo-500/5 rounded-full blur-[120px] -z-10 pointer-events-none" />
@@ -172,11 +188,13 @@ const AppContentMemo = React.memo(AppContent);
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AppContentMemo />
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppContentMemo />
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
